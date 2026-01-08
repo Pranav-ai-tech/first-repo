@@ -1,0 +1,31 @@
+name: flutter_application_1
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.2
+
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase Core (must match storage version)
+  firebase_core: ^4.1.1
+
+  # Storage compatible with firebase_core ^2.18.0
+  firebase_storage: ^13.0.2
+
+  # Optional
+  firebase_auth: ^6.1.0
+  cloud_firestore: ^6.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
