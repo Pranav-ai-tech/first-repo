@@ -2,6 +2,8 @@ from fastapi import FastAPI, Query
 import firebase_admin
 from firebase_admin import credentials, firestore
 from fastapi.middleware.cors import CORSMiddleware
+import os
+import json
 
 app = FastAPI()
 
@@ -14,9 +16,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ Initialize Firebase (ONLY ONCE)
+# ============================================================
+# 🔥 Initialize Firebase using ENVIRONMENT VARIABLE (Render)
+# ============================================================
+
 if not firebase_admin._apps:
-    cred = credentials.Certificate("analytics/firebasekey.json")
+    firebase_key = os.environ.get("FIREBASE_KEY")
+
+    if not firebase_key:
+        raise Exception("FIREBASE_KEY environment variable not set")
+
+    cred_dict = json.loads(firebase_key)
+    cred = credentials.Certificate(cred_dict)
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
