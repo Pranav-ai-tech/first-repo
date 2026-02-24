@@ -33,7 +33,15 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 # ============================================================
-# 🔥 GET LATEST STUDENT PERFORMANCE
+# 🔥 ROOT CHECK (optional but useful)
+# ============================================================
+
+@app.get("/")
+def root():
+    return {"message": "Portfolio backend is running"}
+
+# ============================================================
+# 🔥 GET LATEST STUDENT DATA (FROM USER DOCUMENT)
 # ============================================================
 
 @app.get("/latest-student")
@@ -45,68 +53,40 @@ def latest_student(uid: str = Query(...)):
         if not user_doc.exists:
             return {"error": "User not found"}
 
-        user_data = user_doc.to_dict()
-
-        performance_docs = (
-            user_ref
-            .collection("performance")
-            .order_by("timestamp", direction=firestore.Query.DESCENDING)
-            .limit(1)
-            .stream()
-        )
-
-        performance_doc = next(performance_docs, None)
-
-        if not performance_doc:
-            return {"error": "No performance data found"}
-
-        performance_data = performance_doc.to_dict()
+        data = user_doc.to_dict()
 
         return {
-            "CGPA": performance_data.get("cgpa", 0),
-            "Attendance": performance_data.get("attendance", 0),
-            "Projects": performance_data.get("projects", 0),
-            "Skills": performance_data.get("skills", []),
-            "Timestamp": performance_data.get("timestamp"),
-            "Name": user_data.get("name", ""),
-            "Email": user_data.get("email", "")
+            "CGPA": data.get("cgpa", 0),
+            "Attendance": data.get("attendance", 0),
+            "Projects": data.get("projects", 0),
+            "Skills": data.get("skills", []),
+            "Timestamp": data.get("timestamp"),
         }
 
     except Exception as e:
         return {"error": str(e)}
 
-
 # ============================================================
-# 🔥 GET FULL PERFORMANCE HISTORY
+# 🔥 SIMPLE HISTORY (optional – returns same doc for now)
 # ============================================================
 
 @app.get("/student-history/{uid}")
 def student_history(uid: str):
     try:
         user_ref = db.collection("users").document(uid)
+        user_doc = user_ref.get()
 
-        if not user_ref.get().exists:
+        if not user_doc.exists:
             return {"error": "User not found"}
 
-        performance_docs = (
-            user_ref
-            .collection("performance")
-            .order_by("timestamp")
-            .stream()
-        )
+        data = user_doc.to_dict()
 
-        history = []
-
-        for doc in performance_docs:
-            data = doc.to_dict()
-            history.append({
-                "cgpa": data.get("cgpa", 0),
-                "attendance": data.get("attendance", 0),
-                "projects": data.get("projects", 0),
-                "timestamp": data.get("timestamp")
-            })
-
-        return history
+        return [{
+            "cgpa": data.get("cgpa", 0),
+            "attendance": data.get("attendance", 0),
+            "projects": data.get("projects", 0),
+            "timestamp": data.get("timestamp"),
+        }]
 
     except Exception as e:
         return {"error": str(e)}
