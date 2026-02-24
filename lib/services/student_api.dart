@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 
 class StudentApi {
-  static const String baseUrl = "http://192.168.29.119:8000";
+  static const String baseUrl =
+    "https://portfolio-backend-fzey.onrender.com";
 
   // ================= LATEST STUDENT =================
 
