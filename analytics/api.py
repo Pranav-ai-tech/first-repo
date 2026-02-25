@@ -74,19 +74,29 @@ def latest_student(uid: str = Query(...)):
 def student_history(uid: str):
     try:
         user_ref = db.collection("users").document(uid)
-        user_doc = user_ref.get()
 
-        if not user_doc.exists:
+        if not user_ref.get().exists:
             return {"error": "User not found"}
 
-        data = user_doc.to_dict()
+        performance_docs = (
+            user_ref
+            .collection("performance")
+            .order_by("timestamp")
+            .stream()
+        )
 
-        return [{
-            "cgpa": data.get("cgpa", 0),
-            "attendance": data.get("attendance", 0),
-            "projects": data.get("projects", 0),
-            "timestamp": data.get("timestamp"),
-        }]
+        history = []
+
+        for doc in performance_docs:
+            data = doc.to_dict()
+            history.append({
+                "cgpa": data.get("cgpa", 0),
+                "attendance": data.get("attendance", 0),
+                "projects": data.get("projects", 0),
+                "timestamp": data.get("timestamp")
+            })
+
+        return history
 
     except Exception as e:
         return {"error": str(e)}
